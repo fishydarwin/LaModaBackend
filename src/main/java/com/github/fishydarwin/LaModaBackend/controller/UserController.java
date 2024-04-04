@@ -1,7 +1,6 @@
 package com.github.fishydarwin.LaModaBackend.controller;
 
 import com.github.fishydarwin.LaModaBackend.domain.User;
-import com.github.fishydarwin.LaModaBackend.domain.UserRole;
 import com.github.fishydarwin.LaModaBackend.domain.validator.Validator;
 import com.github.fishydarwin.LaModaBackend.repository.UserRepository;
 import com.github.fishydarwin.LaModaBackend.repository.memory.InMemoryUserRepository;

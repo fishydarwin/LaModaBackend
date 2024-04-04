@@ -21,13 +21,13 @@ public class InMemoryUserRepository implements UserRepository {
                 1, "Administrator", "abcdefghijk", "admin@lamoda.ro", UserRole.ADMIN
         ));
         add(new User(
-                1, "Ioana Dan", "abcdefghijk", "ioana.dan@abc.ro", UserRole.USER
+                2, "Ioana Dan", "abcdefghijk", "ioana.dan@abc.ro", UserRole.USER
         ));
         add(new User(
-                1, "Alina Buzău", "abcdefghijk", "alii.buzbuz@abc.ro", UserRole.USER
+                3, "Alina Buzău", "abcdefghijk", "alii.buzbuz@abc.ro", UserRole.USER
         ));
         add(new User(
-                1, "Selena Komeiji", "abcdefghijk", "selekk12@abc.ro", UserRole.MODERATOR
+                4, "Selena Komeiji", "abcdefghijk", "selekk12@abc.ro", UserRole.MODERATOR
         ));
     }
 
