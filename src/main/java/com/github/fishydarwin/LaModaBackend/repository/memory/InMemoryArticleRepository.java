@@ -214,7 +214,8 @@ public class InMemoryArticleRepository implements ArticleRepository {
     public boolean delete(long id) {
         if (contents.containsKey(id)) {
             contents.get(id).attachmentArray().forEach((attachment) -> attachments.remove(attachment.id()));
-            contents.remove(id);
+            articleIdsOrdered.remove(id);
+            return contents.remove(id) != null;
         }
         return false;
     }

@@ -1,6 +1,7 @@
 package com.github.fishydarwin.LaModaBackend.controller;
 
 import com.github.fishydarwin.LaModaBackend.domain.Article;
+import com.github.fishydarwin.LaModaBackend.domain.validator.Validator;
 import com.github.fishydarwin.LaModaBackend.repository.ArticleRepository;
 import com.github.fishydarwin.LaModaBackend.repository.memory.InMemoryArticleRepository;
 import com.github.fishydarwin.LaModaBackend.util.PagedResult;
@@ -47,22 +48,24 @@ public class ArticleController {
 
     @PostMapping("/article/add")
     public long add(@RequestBody Article article) {
-        //TODO: Validate server-side here: call Validator interface class
+        String validation = Validator.validate(article);
+        if (!validation.equals("OK"))
+            return -1;
         return repository.add(article);
     }
 
     @PutMapping("/article/update/{id}")
     public long update(@RequestBody Article article,
                        @PathVariable long id) {
-        //TODO: Validate server-side here: call Validator interface class
-        //TODO: authenticate author!
+        String validation = Validator.validate(article);
+        if (!validation.equals("OK"))
+            return -1;
         if (article.id() != id) return -1;
         return repository.update(article);
     }
 
-    @DeleteMapping("/article/delete")
+    @DeleteMapping("/article/delete/{id}")
     public boolean delete(@PathVariable long id) {
-        //TODO: Validate server-side here: call Validator interface class
         //TODO: authenticate author!
         return repository.delete(id);
     }

@@ -2,6 +2,7 @@ package com.github.fishydarwin.LaModaBackend.controller;
 
 import com.github.fishydarwin.LaModaBackend.domain.User;
 import com.github.fishydarwin.LaModaBackend.domain.UserRole;
+import com.github.fishydarwin.LaModaBackend.domain.validator.Validator;
 import com.github.fishydarwin.LaModaBackend.repository.UserRepository;
 import com.github.fishydarwin.LaModaBackend.repository.memory.InMemoryUserRepository;
 import org.springframework.web.bind.annotation.*;
@@ -50,7 +51,9 @@ public class UserController {
 
     @PostMapping("/user/add")
     public long add(@RequestBody User user) {
-        //TODO: Validate user server-side here: call Validator interface class
+        String validation = Validator.validate(user);
+        if (!validation.equals("OK"))
+            return -1;
         return repository.add(user);
     }
 
