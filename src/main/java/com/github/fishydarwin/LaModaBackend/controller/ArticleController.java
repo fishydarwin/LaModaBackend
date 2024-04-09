@@ -3,15 +3,50 @@ package com.github.fishydarwin.LaModaBackend.controller;
 import com.github.fishydarwin.LaModaBackend.domain.Article;
 import com.github.fishydarwin.LaModaBackend.domain.validator.Validator;
 import com.github.fishydarwin.LaModaBackend.repository.ArticleRepository;
+import com.github.fishydarwin.LaModaBackend.repository.faker.ArticleFaker;
 import com.github.fishydarwin.LaModaBackend.repository.memory.InMemoryArticleRepository;
 import com.github.fishydarwin.LaModaBackend.util.PagedResult;
+import org.json.simple.parser.ParseException;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 @CrossOrigin
 @RestController
 public class ArticleController {
 
     private final ArticleRepository repository = new InMemoryArticleRepository();
+
+    public ArticleController() {
+
+        /* TESTING WEBSOCKET UPDATE */
+        boolean websocketTest = true;
+        if (websocketTest) {
+            new Thread(() -> {
+
+                for(;;) {
+
+                    try {
+                        Thread.sleep(3000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    try {
+                        add(ArticleFaker.generateRandomArticle());
+                    } catch (URISyntaxException | IOException | ParseException | InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                }
+
+            }).start();
+        }
+
+    }
 
     @GetMapping("/article/all")
     public PagedResult<Article> all(@RequestParam(value="page") int page) {
@@ -68,6 +103,12 @@ public class ArticleController {
     public boolean delete(@PathVariable long id) {
         //TODO: authenticate author!
         return repository.delete(id);
+    }
+
+    @MessageMapping("/article-time")
+    @SendTo("/article")
+    public long refreshArticles() {
+        return repository.getLastUpdateTime();
     }
 
 }

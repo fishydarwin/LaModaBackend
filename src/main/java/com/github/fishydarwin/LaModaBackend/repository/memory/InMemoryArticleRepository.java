@@ -3,8 +3,12 @@ package com.github.fishydarwin.LaModaBackend.repository.memory;
 import com.github.fishydarwin.LaModaBackend.domain.Article;
 import com.github.fishydarwin.LaModaBackend.domain.ArticleAttachment;
 import com.github.fishydarwin.LaModaBackend.repository.ArticleRepository;
+import com.github.fishydarwin.LaModaBackend.repository.faker.ArticleFaker;
 import com.github.fishydarwin.LaModaBackend.util.PagedResult;
+import org.json.simple.parser.ParseException;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,74 +21,22 @@ public class InMemoryArticleRepository implements ArticleRepository {
     private static long LAST_ID_ATTACHMENT = 0;
     private final Map<Long, ArticleAttachment> attachments = new HashMap<>();
 
+    private long lastUpdate = System.currentTimeMillis();
+
     public InMemoryArticleRepository() {
-        
-        add(new Article(
-                1, 1, 1, "Pullover stradă",
-                "Descoperă modelele de pullover pentru primăvară în cea mai nouă colecție a noastră",
-                List.of(
-                        new ArticleAttachment(1, 1,
-                                "/assets/mock-data-images/pullover1.jpg"),
-                        new ArticleAttachment(2, 1,
-                                "/assets/mock-data-images/pullover2.jpg"),
-                        new ArticleAttachment(3, 1,
-                                "/assets/mock-data-images/pullover3.jpg")
-                )
-        ));
-        add(new Article(
-                2, 2, 2, "Vanși modele noi",
-                "Ultimul model de Vanși, cu un design nou și inovator, ce redefinesc standardele stilului",
-                List.of(
-                        new ArticleAttachment(4, 2,
-                                "/assets/mock-data-images/vans1.webp"),
-                        new ArticleAttachment(5, 2,
-                                "/assets/mock-data-images/vans2.jpg"),
-                        new ArticleAttachment(6, 2,
-                                "/assets/mock-data-images/vans3.webp")
-                )
-        ));
-        add(new Article(
-                3, 2, 3, "Păr scurt primăvară",
-                "Împrospătează-ți look-ul cu o tunsoare modernă pentru păr scurt deosebit",
-                List.of(
-                        new ArticleAttachment(7, 3,
-                                "/assets/mock-data-images/shorthair1.jpg"),
-                        new ArticleAttachment(8, 3,
-                                "/assets/mock-data-images/shorthair2.jpg"),
-                        new ArticleAttachment(9, 3,
-                                "/assets/mock-data-images/shorthair3.jpeg")
-                )
-        ));
-        add(new Article(
-                4, 3, 4, "Eyeliner 2024",
-                "Explorează trendurile în moda eyeliner pentru anul 2024 și descoperă cele mai " +
-                        "recente tehnici și stiluri",
-                List.of(
-                        new ArticleAttachment(10, 4,
-                                "/assets/mock-data-images/eyeliner1.webp"),
-                        new ArticleAttachment(11, 4,
-                                "/assets/mock-data-images/eyeliner2.jpeg"),
-                        new ArticleAttachment(12, 4,
-                                "/assets/mock-data-images/eyeliner3.jpg")
-                )
-        ));
-        add(new Article(
-                5, 4, 5, "Albastru stiletto",
-                "Încântă-ți simțurile cu unghii albastre stiletto, adăugând o notă de eleganță " +
-                        "și stil la fiecare pas",
-                List.of(
-                        new ArticleAttachment(13, 5,
-                                "/assets/mock-data-images/stiletto1.jpg"),
-                        new ArticleAttachment(14, 5,
-                                "/assets/mock-data-images/stiletto2.jpg.avif"),
-                        new ArticleAttachment(15, 5,
-                                "/assets/mock-data-images/stiletto3.webp.jpeg")
-                )
-        ));
+        try {
+            ArticleFaker.init();
+            for (int i = 0; i < 50; i++) {
+                add(ArticleFaker.generateRandomArticle());
+            }
+        } catch (URISyntaxException | IOException | ParseException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public PagedResult<Article> all(int page) {
+        if (page < 0) page = 0;
         List<Long> slicedStackArray = new ArrayList<>();
         for (int i = page * 9; i < (page + 1) * 9 && i < articleIdsOrdered.size(); i++)
             slicedStackArray.add(articleIdsOrdered.get(i));
@@ -95,6 +47,7 @@ public class InMemoryArticleRepository implements ArticleRepository {
 
     @Override
     public PagedResult<Article> byUser(int page, long idAuthor) {
+        if (page < 0) page = 0;
         List<Long> slicedStackArray = new ArrayList<>();
         int i = 0;
         long sizeFilter = 0;
@@ -114,6 +67,7 @@ public class InMemoryArticleRepository implements ArticleRepository {
 
     @Override
     public PagedResult<Article> byCategory(int page, long category) {
+        if (page < 0) page = 0;
         List<Long> slicedStackArray = new ArrayList<>();
         int i = 0;
         long sizeFilter = 0;
@@ -133,6 +87,7 @@ public class InMemoryArticleRepository implements ArticleRepository {
 
     @Override
     public PagedResult<Article> byMatchText(int page, String text) {
+        if (page < 0) page = 0;
         List<Long> slicedStackArray = new ArrayList<>();
         int i = 0;
         long sizeFilter = 0;
@@ -183,6 +138,8 @@ public class InMemoryArticleRepository implements ArticleRepository {
 
         contents.put(LAST_ID, added);
         articleIdsOrdered.add(0, LAST_ID);
+        lastUpdate = System.currentTimeMillis();
+
         return LAST_ID;
     }
 
@@ -207,6 +164,8 @@ public class InMemoryArticleRepository implements ArticleRepository {
         );
 
         contents.put(article.id(), updated);
+        lastUpdate = System.currentTimeMillis();
+
         return article.id();
     }
 
@@ -217,6 +176,13 @@ public class InMemoryArticleRepository implements ArticleRepository {
             articleIdsOrdered.remove(id);
             return contents.remove(id) != null;
         }
+        lastUpdate = System.currentTimeMillis();
+
         return false;
+    }
+
+    @Override
+    public long getLastUpdateTime() {
+        return lastUpdate;
     }
 }

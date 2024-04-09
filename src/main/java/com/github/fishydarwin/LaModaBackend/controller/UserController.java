@@ -4,7 +4,10 @@ import com.github.fishydarwin.LaModaBackend.domain.User;
 import com.github.fishydarwin.LaModaBackend.domain.validator.Validator;
 import com.github.fishydarwin.LaModaBackend.repository.UserRepository;
 import com.github.fishydarwin.LaModaBackend.repository.memory.InMemoryUserRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.RequestEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Collection;
 
@@ -52,7 +55,7 @@ public class UserController {
     public long add(@RequestBody User user) {
         String validation = Validator.validate(user);
         if (!validation.equals("OK"))
-            return -1;
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, validation);
         return repository.add(user);
     }
 

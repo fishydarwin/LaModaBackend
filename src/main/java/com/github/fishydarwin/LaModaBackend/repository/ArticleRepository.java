@@ -16,4 +16,6 @@ public interface ArticleRepository {
     long update(Article article);
     boolean delete(long id);
 
+    long getLastUpdateTime();
+
 }
