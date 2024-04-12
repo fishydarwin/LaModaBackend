@@ -21,7 +21,7 @@ import java.net.URISyntaxException;
 @Component
 public class ArticleWebsocketTester implements ApplicationListener<ApplicationReadyEvent> {
 
-    private static final boolean IS_TESTER_ENABLED = true;
+    private static final boolean IS_TESTER_ENABLED = false;
 
     private final ArticleController articleController;
     public ArticleWebsocketTester(ArticleController articleController) {

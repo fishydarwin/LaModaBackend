@@ -39,7 +39,8 @@ public class ImgurBrowser {
 
         HttpRequest request =
                 HttpRequest.newBuilder()
-                        .uri(new URI("https://api.imgur.com/3/gallery/search/time/all/" + rPage + "?q=" + query))
+                        .uri(new URI("https://api.imgur.com/3/gallery/search/time/all/" + rPage + "?q=" +
+                                query + "&mature=false"))
                         .GET()
                         .headers("Authorization", "Client-ID 97782a37bb10062")
                         .build();
