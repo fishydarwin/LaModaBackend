@@ -3,33 +3,30 @@ package com.github.fishydarwin.LaModaBackend.controller;
 import com.github.fishydarwin.LaModaBackend.domain.Article;
 import com.github.fishydarwin.LaModaBackend.domain.validator.Validator;
 import com.github.fishydarwin.LaModaBackend.repository.ArticleRepository;
-import com.github.fishydarwin.LaModaBackend.repository.faker.ArticleFaker;
+import com.github.fishydarwin.LaModaBackend.repository.hibernate.*;
 import com.github.fishydarwin.LaModaBackend.repository.memory.InMemoryArticleRepository;
 import com.github.fishydarwin.LaModaBackend.util.PagedResult;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
-import jakarta.websocket.server.ServerEndpoint;
-import org.json.simple.parser.ParseException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.converter.MappingJackson2MessageConverter;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.stomp.*;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.socket.client.WebSocketClient;
-import org.springframework.web.socket.client.standard.StandardWebSocketClient;
-import org.springframework.web.socket.messaging.WebSocketStompClient;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
 
 @CrossOrigin
 @RestController
 public class ArticleController {
 
-    private final ArticleRepository repository = new InMemoryArticleRepository();
+    private final ArticleRepository repository;
+
+    public ArticleController(HArticleRepository autowiredArticleRepository,
+                             HArticleAttachmentRepository autowiredArticleAttachmentRepository,
+                             HUserRepository autowiredUserRepository,
+                             HCategoryRepository autowiredCategoryRepository) {
+        repository = new JPAArticleRepository(
+                autowiredArticleRepository,
+                autowiredArticleAttachmentRepository,
+                autowiredUserRepository,
+                autowiredCategoryRepository
+        );
+    }
 
     @GetMapping("/article/all")
     public PagedResult<Article> all(@RequestParam(value="page") int page) {

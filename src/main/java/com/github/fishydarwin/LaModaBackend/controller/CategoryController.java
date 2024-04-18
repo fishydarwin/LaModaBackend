@@ -2,6 +2,8 @@ package com.github.fishydarwin.LaModaBackend.controller;
 
 import com.github.fishydarwin.LaModaBackend.domain.Category;
 import com.github.fishydarwin.LaModaBackend.repository.CategoryRepository;
+import com.github.fishydarwin.LaModaBackend.repository.hibernate.HCategoryRepository;
+import com.github.fishydarwin.LaModaBackend.repository.hibernate.JPACategoryRepository;
 import com.github.fishydarwin.LaModaBackend.repository.memory.InMemoryCategoryRepository;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +16,11 @@ import java.util.Collection;
 @RestController
 public class CategoryController {
 
-    private final CategoryRepository repository = new InMemoryCategoryRepository();
+    private final CategoryRepository repository;
+
+    public CategoryController(HCategoryRepository autowiredRepository) {
+        repository = new JPACategoryRepository(autowiredRepository);
+    }
 
     @GetMapping("/category/all")
     public Collection<Category> all() {

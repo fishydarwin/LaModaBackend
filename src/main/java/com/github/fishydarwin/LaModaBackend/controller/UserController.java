@@ -3,9 +3,10 @@ package com.github.fishydarwin.LaModaBackend.controller;
 import com.github.fishydarwin.LaModaBackend.domain.User;
 import com.github.fishydarwin.LaModaBackend.domain.validator.Validator;
 import com.github.fishydarwin.LaModaBackend.repository.UserRepository;
-import com.github.fishydarwin.LaModaBackend.repository.memory.InMemoryUserRepository;
+import com.github.fishydarwin.LaModaBackend.repository.hibernate.HUserRepository;
+import com.github.fishydarwin.LaModaBackend.repository.hibernate.JPAUserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,9 +16,15 @@ import java.util.Collection;
 @RestController
 public class UserController {
 
-    private final UserRepository repository = new InMemoryUserRepository();
+    private final UserRepository repository;
+
+    public UserController(HUserRepository autowiredRepository) {
+        repository = new JPAUserRepository(autowiredRepository);
+    }
+
 
     //TODO: Remove bad security pure User mapping, use ConservativeUser which has only required details.
+    //TODO: using JPA, just set the passwordObfuscated to "" lol
 
     @GetMapping("/user/all")
     public Collection<User> all() {
