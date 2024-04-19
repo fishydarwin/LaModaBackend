@@ -4,7 +4,6 @@ import com.github.fishydarwin.LaModaBackend.domain.Article;
 import com.github.fishydarwin.LaModaBackend.domain.validator.Validator;
 import com.github.fishydarwin.LaModaBackend.repository.ArticleRepository;
 import com.github.fishydarwin.LaModaBackend.repository.hibernate.*;
-import com.github.fishydarwin.LaModaBackend.repository.memory.InMemoryArticleRepository;
 import com.github.fishydarwin.LaModaBackend.util.PagedResult;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;

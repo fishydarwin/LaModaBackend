@@ -182,6 +182,8 @@ public class JPAArticleRepository implements ArticleRepository {
         if (articleMaybe.isEmpty()) return false;
         HArticleWrapper articleWrapper = articleMaybe.get();
 
+        for (HArticleAttachmentWrapper attachment : articleWrapper.getAttachmentArray())
+            articleAttachmentRepository.delete(attachment);
         articleRepository.delete(articleWrapper);
         lastUpdate = System.currentTimeMillis();
         return true;
