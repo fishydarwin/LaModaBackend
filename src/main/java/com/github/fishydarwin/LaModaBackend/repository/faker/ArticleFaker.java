@@ -82,7 +82,7 @@ public class ArticleFaker {
 
     public static Article generateRandomArticle()
             throws URISyntaxException, IOException, ParseException, InterruptedException {
-        int randomId = random.nextInt(1, 5);
+        int randomUserId = random.nextInt(1, 1000);
         int randomCategory = random.nextInt(1, 6);
         String randomTitle = randomFromList(random, possibleWords) + " "
                 + randomFromList(random, possibleConnectors) + " "
@@ -91,7 +91,7 @@ public class ArticleFaker {
         String randomLipsum = randomFromList(random, lipsumList);
 
         return new Article(
-                -1, randomId, randomCategory, randomTitle, randomLipsum,
+                -1, randomUserId, randomCategory, randomTitle, randomLipsum,
                 List.of(
                         new ArticleAttachment(-1, -1,
                                 "https://i.imgur.com" + ImgurBrowser.getRandomImageURL().getFile()),

@@ -3,11 +3,16 @@ package com.github.fishydarwin.LaModaBackend.controller;
 import com.github.fishydarwin.LaModaBackend.domain.Article;
 import com.github.fishydarwin.LaModaBackend.domain.validator.Validator;
 import com.github.fishydarwin.LaModaBackend.repository.ArticleRepository;
+import com.github.fishydarwin.LaModaBackend.repository.faker.ArticleFaker;
 import com.github.fishydarwin.LaModaBackend.repository.hibernate.*;
 import com.github.fishydarwin.LaModaBackend.util.PagedResult;
+import org.json.simple.parser.ParseException;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 @CrossOrigin
 @RestController
@@ -25,6 +30,16 @@ public class ArticleController {
                 autowiredUserRepository,
                 autowiredCategoryRepository
         );
+
+//        try {
+//            System.out.println("Generating articles...");
+//            ArticleFaker.init();
+//            for (int i = 51; i < 10000; i++) {
+//                repository.add(ArticleFaker.generateRandomArticle());
+//            }
+//        } catch (URISyntaxException | IOException | ParseException | InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 
     @GetMapping("/article/all")

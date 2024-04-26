@@ -97,7 +97,7 @@ public class ImgurBrowser {
         int randomIndex = random.nextInt(0, cachedImageURLs.size());
 
         URL imageURL = cachedImageURLs.get(randomIndex);
-        cachedImageURLs.remove(randomIndex);
+//        cachedImageURLs.remove(randomIndex);
 
         return imageURL;
     }
