@@ -2,13 +2,23 @@ package com.github.fishydarwin.LaModaBackend.domain;
 
 import com.github.fishydarwin.LaModaBackend.domain.validator.Validatable;
 
+import java.util.Collection;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public record User(long id, String name, String passwordObfuscated, String email, UserRole role)
     implements Validatable {
 
     private static final Pattern PASSWORD_REGEX = Pattern.compile("^\\w+$");
     private static final Pattern EMAIL_REGEX = Pattern.compile("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$");
+
+    public User obfuscated() {
+        return new User(id, name, "", email, role);
+    }
+
+    public static Collection<User> obfuscateAll(Collection<User> users) {
+        return users.stream().map(User::obfuscated).collect(Collectors.toList());
+    }
 
     @Override
     public String validate() {

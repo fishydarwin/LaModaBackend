@@ -1,7 +1,9 @@
 package com.github.fishydarwin.LaModaBackend.controller;
 
 import com.github.fishydarwin.LaModaBackend.domain.User;
+import com.github.fishydarwin.LaModaBackend.domain.UserRole;
 import com.github.fishydarwin.LaModaBackend.domain.validator.Validator;
+import com.github.fishydarwin.LaModaBackend.manager.UserSessionManager;
 import com.github.fishydarwin.LaModaBackend.repository.UserRepository;
 import com.github.fishydarwin.LaModaBackend.repository.faker.UserFaker;
 import com.github.fishydarwin.LaModaBackend.repository.hibernate.HUserRepository;
@@ -20,20 +22,17 @@ public class UserController {
 
     public UserController(HUserRepository autowiredRepository) {
         repository = new JPAUserRepository(autowiredRepository);
+        UserSessionManager.init();
     }
-
-
-    //TODO: Remove bad security pure User mapping, use ConservativeUser which has only required details.
-    //TODO: using JPA, just set the passwordObfuscated to "" lol
 
     @GetMapping("/user/all")
     public Collection<User> all() {
-        return repository.all();
+        return User.obfuscateAll(repository.all());
     }
 
     @GetMapping("/user/byId")
     public User byId(@RequestParam(value="id") long id) {
-        return repository.byId(id);
+        return repository.byId(id).obfuscated();
     }
 
     @GetMapping("/user/any")
@@ -48,21 +47,30 @@ public class UserController {
     }
 
     @GetMapping("/user/generateSession")
-    public String generateSession(@RequestParam(value="id") long id) {
-        //TODO: authenticate user first
+    public String generateSession(@RequestParam(value="id") long id,
+                                  @RequestParam(value="email") String email,
+                                  @RequestParam(value="passwordObfuscated") String passwordObfuscated) {
+
+        long foundId = repository.idByDetails(email, passwordObfuscated);
+        if (foundId == -1)
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+
+        if (id != foundId)
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+
         return "\"" + repository.generateSession(repository.byId(id)) + "\"";
     }
 
     @GetMapping("/user/bySession")
     public User bySession(@RequestParam(value="sessionId") String sessionId) {
-        return repository.bySession(sessionId);
+        return repository.bySession(sessionId); // only place where we don't obfuscate!
     }
 
     @PostMapping("/user/add")
     public long add(@RequestBody User user) {
         String validation = Validator.validate(user);
         if (!validation.equals("OK"))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, validation);
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, validation);
         return repository.add(user);
     }
 

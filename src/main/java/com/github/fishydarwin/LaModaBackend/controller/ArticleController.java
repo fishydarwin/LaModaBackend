@@ -1,18 +1,17 @@
 package com.github.fishydarwin.LaModaBackend.controller;
 
 import com.github.fishydarwin.LaModaBackend.domain.Article;
+import com.github.fishydarwin.LaModaBackend.domain.User;
 import com.github.fishydarwin.LaModaBackend.domain.validator.Validator;
+import com.github.fishydarwin.LaModaBackend.manager.UserSessionManager;
 import com.github.fishydarwin.LaModaBackend.repository.ArticleRepository;
-import com.github.fishydarwin.LaModaBackend.repository.faker.ArticleFaker;
 import com.github.fishydarwin.LaModaBackend.repository.hibernate.*;
 import com.github.fishydarwin.LaModaBackend.util.PagedResult;
-import org.json.simple.parser.ParseException;
+import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.net.URISyntaxException;
+import org.springframework.web.server.ResponseStatusException;
 
 @CrossOrigin
 @RestController
@@ -85,17 +84,34 @@ public class ArticleController {
 
     @PutMapping("/article/update/{id}")
     public long update(@RequestBody Article article,
-                       @PathVariable long id) {
+                       @PathVariable long id,
+                       @RequestParam String sessionId) {
         String validation = Validator.validate(article);
         if (!validation.equals("OK"))
             return -1;
         if (article.id() != id) return -1;
+
+        Article doubleCheckArticle = repository.byId(id);
+        User sessionUser = UserSessionManager.bySession(sessionId);
+        if (doubleCheckArticle == null || sessionUser == null)
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+        if (sessionUser.id() != doubleCheckArticle.idAuthor())
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+
         return repository.update(article);
     }
 
     @DeleteMapping("/article/delete/{id}")
-    public boolean delete(@PathVariable long id) {
-        //TODO: authenticate author!
+    public boolean delete(@PathVariable long id,
+                          @RequestParam String sessionId) {
+
+        Article doubleCheckArticle = repository.byId(id);
+        User sessionUser = UserSessionManager.bySession(sessionId);
+        if (doubleCheckArticle == null || sessionUser == null)
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid credentials");
+        if (sessionUser.id() != doubleCheckArticle.idAuthor())
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid credentials");
+
         return repository.delete(id);
     }
 

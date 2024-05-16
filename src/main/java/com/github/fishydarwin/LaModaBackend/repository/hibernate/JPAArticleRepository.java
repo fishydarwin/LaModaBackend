@@ -155,7 +155,7 @@ public class JPAArticleRepository implements ArticleRepository {
         HCategoryWrapper category = categoryMaybe.get();
 
         articleWrapper.setName(article.name());
-        articleWrapper.setSummary(article.name());
+        articleWrapper.setSummary(article.summary());
         articleWrapper.setCategory(category);
 
         for (HArticleAttachmentWrapper attachment : articleWrapper.getAttachmentArray())

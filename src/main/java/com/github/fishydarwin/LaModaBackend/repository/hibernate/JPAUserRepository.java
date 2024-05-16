@@ -2,6 +2,7 @@ package com.github.fishydarwin.LaModaBackend.repository.hibernate;
 
 import com.github.fishydarwin.LaModaBackend.domain.User;
 import com.github.fishydarwin.LaModaBackend.domain.hibernate.HUserWrapper;
+import com.github.fishydarwin.LaModaBackend.manager.UserSessionManager;
 import com.github.fishydarwin.LaModaBackend.repository.UserRepository;
 
 import java.util.*;
@@ -15,9 +16,6 @@ public class JPAUserRepository implements UserRepository {
     public JPAUserRepository(HUserRepository autowiredRepository) {
         this.userRepository = autowiredRepository;
     }
-
-    private final Map<String, User> sessionToUser = new HashMap<>();
-    private final Map<Long, String> userIdToSession = new HashMap<>();
 
     @Override
     public Collection<User> all() {
@@ -51,18 +49,12 @@ public class JPAUserRepository implements UserRepository {
 
     @Override
     public String generateSession(User user) {
-        String uuid = UUID.randomUUID().toString();
-        if (userIdToSession.containsKey(user.id()))
-            sessionToUser.remove(userIdToSession.get(user.id()));
-        sessionToUser.put(uuid, user);
-        userIdToSession.put(user.id(), uuid);
-        return uuid;
+        return UserSessionManager.generateSession(user);
     }
 
     @Override
     public User bySession(String sessionId) {
-        if (sessionToUser.containsKey(sessionId)) return sessionToUser.get(sessionId);
-        return null;
+        return UserSessionManager.bySession(sessionId);
     }
 
     @Override
