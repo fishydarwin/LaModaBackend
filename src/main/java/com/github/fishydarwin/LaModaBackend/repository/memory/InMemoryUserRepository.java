@@ -43,7 +43,12 @@ public class InMemoryUserRepository implements UserRepository {
 
     @Override
     public User byId(long id) {
-        if (contents.containsKey(id)) return contents.get(id);
+        System.out.println("\"Unimplemented operation for in-memory repository!\"");
+        return null;
+    }
+
+    @Override
+    public User byEmail(String email) {
         return null;
     }
 
@@ -83,5 +88,11 @@ public class InMemoryUserRepository implements UserRepository {
     @Override
     public boolean anyByEmail(String email) {
         return usedEmails.contains(email);
+    }
+
+    @Override
+    public boolean updateUserRole(long id, UserRole role) {
+        System.out.println("\"Unimplemented operation for in-memory repository!\"");
+        return false;
     }
 }

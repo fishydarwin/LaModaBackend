@@ -1,6 +1,7 @@
 package com.github.fishydarwin.LaModaBackend.repository.hibernate;
 
 import com.github.fishydarwin.LaModaBackend.domain.User;
+import com.github.fishydarwin.LaModaBackend.domain.UserRole;
 import com.github.fishydarwin.LaModaBackend.domain.hibernate.HUserWrapper;
 import com.github.fishydarwin.LaModaBackend.manager.UserSessionManager;
 import com.github.fishydarwin.LaModaBackend.repository.UserRepository;
@@ -41,6 +42,14 @@ public class JPAUserRepository implements UserRepository {
     }
 
     @Override
+    public User byEmail(String email) {
+        HUserWrapper user = userRepository.findByEmail(email);
+        if (user == null) return null;
+        return new User(user.getId(), user.getName(), user.getPasswordObfuscated(),
+                user.getEmail(), user.getRole());
+    }
+
+    @Override
     public long idByDetails(String email, String passwordObfuscated) {
         HUserWrapper user = userRepository.findByEmailAndPasswordObfuscated(email, passwordObfuscated);
         if (user == null) return -1;
@@ -66,5 +75,15 @@ public class JPAUserRepository implements UserRepository {
     @Override
     public boolean anyByEmail(String email) {
         return userRepository.findByEmail(email) != null;
+    }
+
+    @Override
+    public boolean updateUserRole(long id, UserRole role) {
+        Optional<HUserWrapper> userMaybe = userRepository.findById((int) id);
+        if (userMaybe.isEmpty()) return false;
+        HUserWrapper user = userMaybe.get();
+        user.setRole(role);
+        userRepository.save(user);
+        return true;
     }
 }

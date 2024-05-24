@@ -2,6 +2,7 @@ package com.github.fishydarwin.LaModaBackend.controller;
 
 import com.github.fishydarwin.LaModaBackend.domain.Article;
 import com.github.fishydarwin.LaModaBackend.domain.User;
+import com.github.fishydarwin.LaModaBackend.domain.UserRole;
 import com.github.fishydarwin.LaModaBackend.domain.validator.Validator;
 import com.github.fishydarwin.LaModaBackend.manager.UserSessionManager;
 import com.github.fishydarwin.LaModaBackend.repository.ArticleRepository;
@@ -93,10 +94,14 @@ public class ArticleController {
 
         Article doubleCheckArticle = repository.byId(id);
         User sessionUser = UserSessionManager.bySession(sessionId);
-        if (doubleCheckArticle == null || sessionUser == null)
+        if (doubleCheckArticle == null || sessionUser == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
-        if (sessionUser.id() != doubleCheckArticle.idAuthor())
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+        }
+        if (sessionUser.role() == UserRole.USER) {
+            if (sessionUser.id() != doubleCheckArticle.idAuthor()) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+            }
+        }
 
         return repository.update(article);
     }
@@ -109,8 +114,9 @@ public class ArticleController {
         User sessionUser = UserSessionManager.bySession(sessionId);
         if (doubleCheckArticle == null || sessionUser == null)
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid credentials");
-        if (sessionUser.id() != doubleCheckArticle.idAuthor())
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid credentials");
+        if (sessionUser.role() == UserRole.USER)
+            if (sessionUser.id() != doubleCheckArticle.idAuthor())
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid credentials");
 
         return repository.delete(id);
     }

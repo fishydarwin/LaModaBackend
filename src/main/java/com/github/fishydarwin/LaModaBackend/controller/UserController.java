@@ -1,5 +1,6 @@
 package com.github.fishydarwin.LaModaBackend.controller;
 
+import com.github.fishydarwin.LaModaBackend.domain.Article;
 import com.github.fishydarwin.LaModaBackend.domain.User;
 import com.github.fishydarwin.LaModaBackend.domain.UserRole;
 import com.github.fishydarwin.LaModaBackend.domain.validator.Validator;
@@ -77,6 +78,26 @@ public class UserController {
     @GetMapping("/user/anyByEmail")
     public boolean anyByEmail(@RequestParam(value="email") String email) {
         return repository.anyByEmail(email);
+    }
+
+    @PutMapping("/user/changeModerator/{email}")
+    public boolean changeModerator(@PathVariable String email, @RequestParam String sessionId) {
+
+        User sessionUser = UserSessionManager.bySession(sessionId);
+        if (sessionUser == null)
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+        if (sessionUser.role() != UserRole.ADMIN)
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+
+        User user = repository.byEmail(email);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No known user with that email.");
+        }
+        if (sessionUser.id() == user.id())
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid operation! Cannot modify self role!");
+
+        UserRole currentRole = repository.byId(user.id()).role();
+        return repository.updateUserRole(user.id(), currentRole == UserRole.USER ? UserRole.MODERATOR : UserRole.USER);
     }
 
 }
