@@ -59,13 +59,13 @@ public class ArticleWebsocketTester implements ApplicationListener<ApplicationRe
                         throw new RuntimeException(e);
                     }
 
-                    try {
-                        articleController.add(ArticleFaker.generateRandomArticle());
-                        session.send("/app/article-time", "");
-                        System.out.println("Added another random article...");
-                    } catch (URISyntaxException | IOException | ParseException | InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+//                    try {
+//                        articleController.add(ArticleFaker.generateRandomArticle());
+//                        session.send("/app/article-time", "");
+//                        System.out.println("Added another random article...");
+//                    } catch (URISyntaxException | IOException | ParseException | InterruptedException e) {
+//                        throw new RuntimeException(e);
+//                    }
 
                 }
 

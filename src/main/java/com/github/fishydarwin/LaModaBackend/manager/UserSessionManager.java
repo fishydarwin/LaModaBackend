@@ -6,6 +6,7 @@ import java.util.*;
 
 public class UserSessionManager {
 
+    // TODO: it's probably better to use a DB table here for less vertical scaling.
     private static final Map<String, User> sessionToUser = new HashMap<>();
     private static final Map<Long, String> userIdToSession = new HashMap<>();
     private static final Map<String, Long> sessionUseTimestamps = new HashMap<>();

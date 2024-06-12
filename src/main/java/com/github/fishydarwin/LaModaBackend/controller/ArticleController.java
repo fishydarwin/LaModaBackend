@@ -1,12 +1,14 @@
 package com.github.fishydarwin.LaModaBackend.controller;
 
 import com.github.fishydarwin.LaModaBackend.domain.Article;
+import com.github.fishydarwin.LaModaBackend.domain.ArticleAttachment;
 import com.github.fishydarwin.LaModaBackend.domain.User;
 import com.github.fishydarwin.LaModaBackend.domain.UserRole;
 import com.github.fishydarwin.LaModaBackend.domain.validator.Validator;
 import com.github.fishydarwin.LaModaBackend.manager.UserSessionManager;
 import com.github.fishydarwin.LaModaBackend.repository.ArticleRepository;
 import com.github.fishydarwin.LaModaBackend.repository.hibernate.*;
+import com.github.fishydarwin.LaModaBackend.service.StorageService;
 import com.github.fishydarwin.LaModaBackend.util.PagedResult;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -19,17 +21,22 @@ import org.springframework.web.server.ResponseStatusException;
 public class ArticleController {
 
     private final ArticleRepository repository;
+    private final StorageService storageService;
 
     public ArticleController(HArticleRepository autowiredArticleRepository,
                              HArticleAttachmentRepository autowiredArticleAttachmentRepository,
                              HUserRepository autowiredUserRepository,
-                             HCategoryRepository autowiredCategoryRepository) {
+                             HCategoryRepository autowiredCategoryRepository,
+                             StorageService storageService) {
         repository = new JPAArticleRepository(
                 autowiredArticleRepository,
                 autowiredArticleAttachmentRepository,
                 autowiredUserRepository,
                 autowiredCategoryRepository
         );
+
+        this.storageService = storageService;
+        this.storageService.init();
 
 //        try {
 //            System.out.println("Generating articles...");
@@ -76,10 +83,27 @@ public class ArticleController {
     }
 
     @PostMapping("/article/add")
-    public long add(@RequestBody Article article) {
+    public long add(@RequestBody Article article,
+                    @RequestParam String sessionId) {
         String validation = Validator.validate(article);
         if (!validation.equals("OK"))
             return -1;
+
+        User sessionUser = UserSessionManager.bySession(sessionId);
+        if (sessionUser == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+        }
+        if (sessionUser.id() != article.idAuthor()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+        }
+
+        for (ArticleAttachment attachment : article.attachmentArray()) {
+            String[] attachmentPathSplit = attachment.attachmentUrl().split("\\/");
+            String attachmentFile = attachmentPathSplit[attachmentPathSplit.length - 1];
+            if (!storageService.has(attachmentFile))
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Article added before attachments!");
+        }
+
         return repository.add(article);
     }
 
@@ -102,6 +126,10 @@ public class ArticleController {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
             }
         }
+
+        for (ArticleAttachment attachment : article.attachmentArray())
+            if (!storageService.has(attachment.attachmentUrl()))
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Article updated before attachments!");
 
         return repository.update(article);
     }
