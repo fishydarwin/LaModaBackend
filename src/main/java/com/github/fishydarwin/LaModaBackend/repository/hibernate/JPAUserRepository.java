@@ -5,6 +5,7 @@ import com.github.fishydarwin.LaModaBackend.domain.UserRole;
 import com.github.fishydarwin.LaModaBackend.domain.hibernate.HUserWrapper;
 import com.github.fishydarwin.LaModaBackend.manager.UserSessionManager;
 import com.github.fishydarwin.LaModaBackend.repository.UserRepository;
+import com.github.fishydarwin.LaModaBackend.util.SHA256Hash;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -51,7 +52,8 @@ public class JPAUserRepository implements UserRepository {
 
     @Override
     public long idByDetails(String email, String passwordObfuscated) {
-        HUserWrapper user = userRepository.findByEmailAndPasswordObfuscated(email, passwordObfuscated);
+        String encryptedPassword = SHA256Hash.encrypt(passwordObfuscated);
+        HUserWrapper user = userRepository.findByEmailAndPasswordObfuscated(email, encryptedPassword);
         if (user == null) return -1;
         return user.getId();
     }
@@ -68,7 +70,8 @@ public class JPAUserRepository implements UserRepository {
 
     @Override
     public long add(User user) {
-        HUserWrapper userWrapper = new HUserWrapper(user.name(), user.passwordObfuscated(), user.email(), user.role());
+        String passwordObfuscated = SHA256Hash.encrypt(user.passwordObfuscated());
+        HUserWrapper userWrapper = new HUserWrapper(user.name(), passwordObfuscated, user.email(), user.role());
         return userRepository.save(userWrapper).getId();
     }
 

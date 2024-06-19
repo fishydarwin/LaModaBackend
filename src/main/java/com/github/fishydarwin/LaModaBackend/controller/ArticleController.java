@@ -127,9 +127,12 @@ public class ArticleController {
             }
         }
 
-        for (ArticleAttachment attachment : article.attachmentArray())
-            if (!storageService.has(attachment.attachmentUrl()))
+        for (ArticleAttachment attachment : article.attachmentArray()) {
+            String[] attachmentPathSplit = attachment.attachmentUrl().split("\\/");
+            String attachmentFile = attachmentPathSplit[attachmentPathSplit.length - 1];
+            if (!storageService.has(attachmentFile))
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Article updated before attachments!");
+        }
 
         return repository.update(article);
     }
